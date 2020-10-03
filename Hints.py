@@ -897,6 +897,8 @@ def buildGanonBossKeyString(world):
                 item_req_string = str(world.lacs_stones) + ' ' + item_req_string
             elif world.lacs_condition == 'dungeons':
                 item_req_string = str(world.lacs_rewards) + ' ' + item_req_string
+            elif world.lacs_condition == 'tokens':
+                item_req_string = str(world.lacs_tokens) + ' ' + item_req_string
             if '#' not in item_req_string:
                 item_req_string = '#%s#' % item_req_string
             bk_location_string = "provided by Zelda once %s are retrieved" % item_req_string

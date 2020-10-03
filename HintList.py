@@ -127,6 +127,8 @@ def tokens_required_by_settings(world):
     tokens = 0
     if world.bridge == 'tokens':
         tokens = max(tokens, world.bridge_tokens)
+    if world.shuffle_ganon_bosskey == 'lacs_tokens':
+        tokens = max(tokens, world.lacs_tokens)
 
     return tokens
 
@@ -1218,6 +1220,7 @@ hintTable = {
     'lacs_medallions':                                          ("Medallions", None, 'lacs'),
     'lacs_stones':                                              ("Spiritual Stones", None, 'lacs'),
     'lacs_dungeons':                                            ("Spiritual Stones and Medallions", None, 'lacs'),
+    'lacs_tokens':                                              ("Gold Skulltula Tokens", None, 'lacs'),
 
     'Spiritual Stone Text Start':                               ("3 Spiritual Stones found in Hyrule...", None, 'altar'),
     'Child Altar Text End':                                     ("\x13\x07Ye who may become a Hero...&Stand with the Ocarina and&play the Song of Time.", None, 'altar'),
