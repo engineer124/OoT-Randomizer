@@ -875,7 +875,7 @@ def buildBridgeReqsString(world):
         elif world.bridge == 'stones':
             item_req_string = str(world.bridge_stones) + ' ' + item_req_string
         elif world.bridge == 'dungeons':
-            item_req_string = str(world.bridge_dungeons) + ' ' + item_req_string
+            item_req_string = str(world.bridge_rewards) + ' ' + item_req_string
         elif world.bridge == 'tokens':
             item_req_string = str(world.bridge_tokens) + ' ' + item_req_string
         if '#' not in item_req_string:
@@ -896,7 +896,9 @@ def buildGanonBossKeyString(world):
             elif world.lacs_condition == 'stones':
                 item_req_string = str(world.lacs_stones) + ' ' + item_req_string
             elif world.lacs_condition == 'dungeons':
-                item_req_string = str(world.lacs_dungeons) + ' ' + item_req_string
+                item_req_string = str(world.lacs_rewards) + ' ' + item_req_string
+            elif world.lacs_condition == 'tokens':
+                item_req_string = str(world.lacs_tokens) + ' ' + item_req_string
             if '#' not in item_req_string:
                 item_req_string = '#%s#' % item_req_string
             bk_location_string = "provided by Zelda once %s are retrieved" % item_req_string

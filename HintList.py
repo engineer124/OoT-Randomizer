@@ -96,36 +96,41 @@ def getRequiredHints(world):
 
 # Helpers for conditional always hints
 def stones_required_by_settings(world):
+    stones = 0
     if world.bridge == 'stones':
-        return world.bridge_stones
-    elif world.shuffle_ganon_bosskey == 'lacs_stones':
-        return world.lacs_stones
-    elif world.bridge == 'dungeons':
-        return max(world.bridge_rewards - 6, 0)
-    elif world.shuffle_ganon_bosskey == 'lacs_dungeons':
-        return max(world.lacs_rewards - 6, 0)
+        stones = max(stones, world.bridge_stones)
+    if world.shuffle_ganon_bosskey == 'lacs_stones':
+        stones = max(stones, world.lacs_stones)
+    if world.bridge == 'dungeons':
+        stones = max(stones, world.bridge_rewards - 6)
+    if world.shuffle_ganon_bosskey == 'lacs_dungeons':
+        stones = max(stones, world.lacs_rewards - 6)
 
-    return 0
+    return stones
 
 
 def medallions_required_by_settings(world):
+    medallions = 0
     if world.bridge == 'medallions':
-        return world.bridge_medallions
-    elif world.shuffle_ganon_bosskey == 'lacs_medallions':
-        return world.lacs_medallions
-    elif world.bridge == 'dungeons':
-        return max(world.bridge_rewards - 3, 0)
-    elif world.shuffle_ganon_bosskey == 'lacs_dungeons':
-        return max(world.lacs_rewards - 3, 0)
+        medallions = max(medallions, world.bridge_medallions)
+    if world.shuffle_ganon_bosskey == 'lacs_medallions':
+        medallions = max(medallions, world.lacs_medallions)
+    if world.bridge == 'dungeons':
+        medallions = max(medallions, max(world.bridge_rewards - 3, 0))
+    if world.shuffle_ganon_bosskey == 'lacs_dungeons':
+        medallions = max(medallions, max(world.lacs_rewards - 3, 0))
 
-    return 0
+    return medallions
 
 
 def tokens_required_by_settings(world):
+    tokens = 0
     if world.bridge == 'tokens':
-        return world.bridge_tokens
+        tokens = max(tokens, world.bridge_tokens)
+    if world.shuffle_ganon_bosskey == 'lacs_tokens':
+        tokens = max(tokens, world.lacs_tokens)
 
-    return 0
+    return tokens
 
 
 # Hints required under certain settings
@@ -1215,6 +1220,7 @@ hintTable = {
     'lacs_medallions':                                          ("Medallions", None, 'lacs'),
     'lacs_stones':                                              ("Spiritual Stones", None, 'lacs'),
     'lacs_dungeons':                                            ("Spiritual Stones and Medallions", None, 'lacs'),
+    'lacs_tokens':                                              ("Gold Skulltula Tokens", None, 'lacs'),
 
     'Spiritual Stone Text Start':                               ("3 Spiritual Stones found in Hyrule...", None, 'altar'),
     'Child Altar Text End':                                     ("\x13\x07Ye who may become a Hero...&Stand with the Ocarina and&play the Song of Time.", None, 'altar'),

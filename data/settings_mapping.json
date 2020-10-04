@@ -208,6 +208,7 @@
             "lacs_medallions",
             "lacs_stones",
             "lacs_rewards",
+            "lacs_tokens",
             "enhance_map_compass"
           ]
         }
