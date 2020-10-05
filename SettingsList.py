@@ -2,8 +2,9 @@ import argparse
 import re
 import math
 import json
-from Cosmetics import get_tunic_color_options, get_navi_color_options, get_sword_color_options,\
-    get_gauntlet_color_options, get_magic_color_options, get_heart_color_options, get_a_button_color_options,\
+from Cosmetics import get_tunic_color_options, get_navi_color_options, get_sword_trail_color_options, \
+    get_bombchu_trail_color_options, get_boomerang_trail_color_options, get_gauntlet_color_options, \
+    get_magic_color_options, get_heart_color_options, get_shield_frame_color_options, get_a_button_color_options, \
     get_b_button_color_options, get_c_button_color_options, get_start_button_color_options
 from Location import LocationIterator
 import Sounds as sfx
@@ -142,7 +143,7 @@ logic_tricks = {
                     '''},
     'Hidden Grottos without Stone of Agony': {
         'name'    : 'logic_grottos_without_agony',
-        'tags'    : ("General", "Entrance"),
+        'tags'    : ("General", "Entrance",),
         'tooltip' : '''\
                     Allows entering hidden grottos without the
                     Stone of Agony.
@@ -384,7 +385,7 @@ logic_tricks = {
                     '''},
     'Spirit Temple Main Room Jump from Hands to Upper Ledges': {
         'name'    : 'logic_spirit_lobby_jump',
-        'tags'    : ("Spirit Temple", "Skulltulas"),
+        'tags'    : ("Spirit Temple", "Skulltulas",),
         'tooltip' : '''\
                     A precise jump to obtain the following as adult
                     without needing one of Hookshot or Hover Boots:
@@ -443,7 +444,7 @@ logic_tricks = {
                     '''},
     'Fire Temple MQ Flame Wall Maze Skip': {
         'name'    : 'logic_fire_mq_flame_maze',
-        'tags'    : ("Fire Temple", "Skulltulas"),
+        'tags'    : ("Fire Temple", "Skulltulas",),
         'tooltip' : '''\
                     If you move quickly you can sneak past the edge of
                     a flame wall before it can rise up to block you.
@@ -867,7 +868,7 @@ logic_tricks = {
                     '''},
     'Hyrule Castle Storms Grotto GS with Just Boomerang': {
         'name'    : 'logic_castle_storms_gs',
-        'tags'    : ("Hyrule Castle", "Skulltulas"),
+        'tags'    : ("Hyrule Castle", "Skulltulas",),
         'tooltip' : '''\
                     With precise throws, the Boomerang alone can
                     kill the Skulltula and collect the token,
@@ -1029,7 +1030,7 @@ logic_tricks = {
                     '''},
     'Goron City Grotto with Hookshot While Taking Damage': {
         'name'    : 'logic_goron_grotto',
-        'tags'    : ("Goron City"),
+        'tags'    : ("Goron City",),
         'tooltip' : '''\
                     It is possible to reach the Goron City Grotto by
                     quickly using the Hookshot while in the midst of
@@ -2648,7 +2649,9 @@ setting_infos = [
             'startwith': 'Start With',
             'vanilla':   'Vanilla Locations',
             'dungeon':   'Dungeon Only',
-            'keysanity': 'Anywhere'
+            'overworld': 'Overworld Only',
+            'dungeons':  'Any Dungeon',
+            'keysanity': 'Anywhere',
         },
         gui_tooltip    = '''\
             'Remove': Maps and Compasses are removed.
@@ -2664,12 +2667,18 @@ setting_infos = [
 
             'Dungeon': Maps and Compasses can only appear
             in their respective dungeon.
+            
+            'Overworld Only': Maps and Compasses can only appear
+            outside of dungeons.
+
+            'Any Dungeon': Maps and Compasses can only appear in a
+            dungeon, but not necessarily the dungeon they are for.            
 
             'Anywhere': Maps and Compasses can appear
             anywhere in the world.
 
-            Setting 'Remove', 'Start With, or 'Anywhere' will
-            add 2 more possible locations to each Dungeons.
+            Setting 'Remove', 'Start With, 'Overworld', or 'Anywhere'
+            will add 2 more possible locations to each Dungeons.
             This makes dungeons more profitable, especially
             Ice Cavern, Water Temple, and Jabu Jabu's Belly.
         ''',
@@ -2686,7 +2695,9 @@ setting_infos = [
             'remove':    'Remove (Keysy)',
             'vanilla':   'Vanilla Locations',
             'dungeon':   'Dungeon Only',
-            'keysanity': 'Anywhere (Keysanity)'
+            'overworld': 'Overworld Only (Keysanity)',
+            'dungeons':  'Any Dungeon (Keysanity)',
+            'keysanity': 'Anywhere (Keysanity)',
         },
         gui_tooltip    = '''\
             'Remove': Small Keys are removed. All locked
@@ -2701,7 +2712,18 @@ setting_infos = [
             'Dungeon': Small Keys can only appear in their
             respective dungeon. If Fire Temple is not a
             Master Quest dungeon, the door to the Boss Key
-            chest will be unlocked
+            chest will be unlocked.
+            
+            'Overworld Only': Small Keys can only appear outside
+            of dungeons. You may need to enter a dungeon multiple
+            times to gain items to access the overworld locations
+            with the keys required to finish a dungeon.
+            
+            'Any Dungeon': Small Keys can only appear inside
+            of any dungeon, but won't necessarily be in the
+            dungeon that the key is for. A difficult mode since
+            it is more likely to need to enter a dungeon
+            multiple times.
 
             'Anywhere': Small Keys can appear
             anywhere in the world. A difficult mode since
@@ -2725,6 +2747,8 @@ setting_infos = [
             'remove':    'Remove (Keysy)',
             'vanilla':   'Vanilla Locations',
             'dungeon':   'Dungeon Only',
+            'overworld': 'Overworld Only (Keysanity)',
+            'dungeons':  'Any Dungeon (Keysanity)',
             'keysanity': 'Anywhere (Keysanity)',
         },
         gui_tooltip    = '''\
@@ -2737,6 +2761,17 @@ setting_infos = [
 
             'Dungeon': Boss Keys can only appear in their
             respective dungeon.
+            
+            'Overworld Only': Boss Keys can only appear outside
+            of dungeons. You may need to enter a dungeon without
+            the boss key to get items required to find the key
+            in the overworld.
+            
+            'Any Dungeon': Boss Keys can only appear inside
+            of any dungeon, but won't necessarily be in the
+            dungeon that the key is for. A difficult mode since
+            it is more likely to need to enter a dungeon
+            multiple times.
 
             'Anywhere': Boss Keys can appear
             anywhere in the world. A difficult mode since
@@ -2761,6 +2796,8 @@ setting_infos = [
             'remove':          "Remove (Keysy)",
             'vanilla':         "Vanilla Location",
             'dungeon':         "Dungeon Only",
+            'overworld':       "Overworld Only (Keysanity)",
+            'dungeons':        "Any Dungeon (Keysanity)",
             'keysanity':       "Anywhere (Keysanity)",
             'lacs_vanilla':    "On LACS: Vanilla",
             'lacs_medallions': "On LACS: Medallions",
@@ -2777,6 +2814,12 @@ setting_infos = [
 
             'Vanilla': Ganon's Castle Boss Key will appear in 
             the vanilla location.
+            
+            'Overworld Only': Ganon's Castle Boss Key can only appear
+            outside of dungeons.
+            
+            'Any Dungeon': Ganon's Castle Boss Key can only appear
+            inside of a dungeon, but not necessarily Ganon's Castle.
 
             'Anywhere': Ganon's Castle Boss Key can appear
             anywhere in the world.
@@ -3453,7 +3496,7 @@ setting_infos = [
         ''',
         default        = False,
         disable    = {
-            True : {'sections' : [ "equipment_section", "ui_section", "navi_section" ]
+            True : {'sections' : [ "equipment_color_section", "ui_color_section", "misc_color_section" ]
             }
         }
     ),
@@ -3535,6 +3578,7 @@ setting_infos = [
             color from this list of colors.
             'Completely Random': Choose a random
             color from any color the N64 can draw.
+            'Rainbow': Cycle through a color rainbow.
         ''',
         gui_params     = {
             'no_line_break' : True,
@@ -3544,7 +3588,7 @@ setting_infos = [
             ]
         }
     ),
-        Setting_Info(
+    Setting_Info(
         name           = 'navi_color_default_outer',
         type           = str,
         gui_text       = "Outer",
@@ -3557,6 +3601,7 @@ setting_infos = [
             color from this list of colors.
             'Completely Random': Choose a random
             color from any color the N64 can draw.
+            'Rainbow': Cycle through a color rainbow.
         ''',
         gui_params     = {
             'randomize_key': 'randomize_all_cosmetics',
@@ -3579,6 +3624,7 @@ setting_infos = [
             color from this list of colors.
             'Completely Random': Choose a random
             color from any color the N64 can draw.
+            'Rainbow': Cycle through a color rainbow.
         ''',
         gui_params     = {
             'no_line_break' : True,
@@ -3602,6 +3648,7 @@ setting_infos = [
             color from this list of colors.
             'Completely Random': Choose a random
             color from any color the N64 can draw.
+            'Rainbow': Cycle through a color rainbow.
         ''',
         gui_params     = {
             'randomize_key': 'randomize_all_cosmetics',
@@ -3624,6 +3671,7 @@ setting_infos = [
             color from this list of colors.
             'Completely Random': Choose a random
             color from any color the N64 can draw.
+            'Rainbow': Cycle through a color rainbow.
         ''',
         gui_params     = {
             'no_line_break' : True,
@@ -3647,6 +3695,7 @@ setting_infos = [
             color from this list of colors.
             'Completely Random': Choose a random
             color from any color the N64 can draw.
+            'Rainbow': Cycle through a color rainbow.
         ''',
         gui_params     = {
             'randomize_key': 'randomize_all_cosmetics',
@@ -3669,6 +3718,7 @@ setting_infos = [
             color from this list of colors.
             'Completely Random': Choose a random
             color from any color the N64 can draw.
+            'Rainbow': Cycle through a color rainbow.
         ''',
         gui_params     = {
             'no_line_break' : True,
@@ -3692,6 +3742,148 @@ setting_infos = [
             color from this list of colors.
             'Completely Random': Choose a random
             color from any color the N64 can draw.
+            'Rainbow': Cycle through a color rainbow.
+        ''',
+        gui_params     = {
+            'randomize_key': 'randomize_all_cosmetics',
+            'distribution': [
+                ('Completely Random', 1),
+            ]
+        }
+
+    ),
+    Setting_Info(
+        name           = 'bombchu_trail_color_inner',
+        type           = str,
+        gui_text       = 'Bombchu Trail Inner',
+        gui_type       = "Combobox",
+        shared         = False,
+        choices        = get_bombchu_trail_color_options(),
+        default        = 'Red',
+        gui_tooltip    = '''\
+            'Random Choice': Choose a random
+            color from this list of colors.
+            'Completely Random': Choose a random
+            color from any color the N64 can draw.
+            'Rainbow': Cycle through a color rainbow.
+        ''',
+        gui_params     = {
+            'no_line_break' : True,
+            'randomize_key': 'randomize_all_cosmetics',
+            'distribution': [
+                ('Completely Random', 1),
+            ]
+        }
+
+    ),
+    Setting_Info(
+        name           = 'bombchu_trail_color_outer',
+        type           = str,
+        gui_text       = 'Outer',
+        gui_type       = "Combobox",
+        shared         = False,
+        choices        = get_bombchu_trail_color_options(True),
+        default        = '[Same as Inner]',
+        gui_tooltip    = '''\
+            'Random Choice': Choose a random
+            color from this list of colors.
+            'Completely Random': Choose a random
+            color from any color the N64 can draw.
+            'Rainbow': Cycle through a color rainbow.
+        ''',
+        gui_params     = {
+            'randomize_key': 'randomize_all_cosmetics',
+            'distribution': [
+                ('Completely Random', 1),
+            ]
+        }
+
+    ),
+    Setting_Info(
+        name           = 'boomerang_trail_color_inner',
+        type           = str,
+        gui_text       = 'Boomerang Trail Inner',
+        gui_type       = "Combobox",
+        shared         = False,
+        choices        = get_boomerang_trail_color_options(),
+        default        = 'Yellow',
+        gui_tooltip    = '''\
+            'Random Choice': Choose a random
+            color from this list of colors.
+            'Completely Random': Choose a random
+            color from any color the N64 can draw.
+            'Rainbow': Cycle through a color rainbow.
+        ''',
+        gui_params     = {
+            'no_line_break' : True,
+            'randomize_key': 'randomize_all_cosmetics',
+            'distribution': [
+                ('Completely Random', 1),
+            ]
+        }
+
+    ),
+    Setting_Info(
+        name           = 'boomerang_trail_color_outer',
+        type           = str,
+        gui_text       = 'Outer',
+        gui_type       = "Combobox",
+        shared         = False,
+        choices        = get_boomerang_trail_color_options(True),
+        default        = '[Same as Inner]',
+        gui_tooltip    = '''\
+            'Random Choice': Choose a random
+            color from this list of colors.
+            'Completely Random': Choose a random
+            color from any color the N64 can draw.
+            'Rainbow': Cycle through a color rainbow.
+        ''',
+        gui_params     = {
+            'randomize_key': 'randomize_all_cosmetics',
+            'distribution': [
+                ('Completely Random', 1),
+            ]
+        }
+
+    ),
+    Setting_Info(
+        name           = 'sword_trail_color_inner',
+        type           = str,
+        gui_text       = 'Sword Trail Inner',
+        gui_type       = "Combobox",
+        shared         = False,
+        choices        = get_sword_trail_color_options(),
+        default        = 'White',
+        gui_tooltip    = '''\
+            'Random Choice': Choose a random
+            color from this list of colors.
+            'Completely Random': Choose a random
+            color from any color the N64 can draw.
+            'Rainbow': Cycle through a color rainbow.
+        ''',
+        gui_params     = {
+            'no_line_break' : True,
+            'randomize_key': 'randomize_all_cosmetics',
+            'distribution': [
+                ('Completely Random', 1),
+            ]
+        }
+
+    ),
+    Setting_Info(
+        name           = 'sword_trail_color_outer',
+        type           = str,
+        gui_text       = 'Outer',
+        gui_type       = "Combobox",
+        shared         = False,
+        choices        = get_sword_trail_color_options(True),
+        default        = '[Same as Inner]',
+        gui_tooltip    = '''\
+            'Random Choice': Choose a random
+            color from this list of colors.
+            'Completely Random': Choose a random
+            color from any color the N64 can draw.
+            'Rainbow': Cycle through a color rainbow.
         ''',
         gui_params     = {
             'randomize_key': 'randomize_all_cosmetics',
@@ -3725,52 +3917,6 @@ setting_infos = [
         }
     ),
     Setting_Info(
-        name           = 'sword_trail_color_inner',
-        type           = str,
-        gui_text       = 'Sword Trail Inner Color',
-        gui_type       = "Combobox",
-        shared         = False,
-        choices        = get_sword_color_options(),
-        default        = 'White',
-        gui_tooltip    = '''\
-            'Random Choice': Choose a random
-            color from this list of colors.
-            'Completely Random': Choose a random
-            color from any color the N64 can draw.
-            'Rainbow': Rainbow sword trails.
-        ''',
-        gui_params     = {
-            'randomize_key': 'randomize_all_cosmetics',
-            'distribution': [
-                ('Completely Random', 1),
-            ]
-        }
-
-    ),
-    Setting_Info(
-        name           = 'sword_trail_color_outer',
-        type           = str,
-        gui_text       = 'Sword Trail Outer Color',
-        gui_type       = "Combobox",
-        shared         = False,
-        choices        = get_sword_color_options(),
-        default        = 'White',
-        gui_tooltip    = '''\
-                  'Random Choice': Choose a random
-                  color from this list of colors.
-                  'Completely Random': Choose a random
-                  color from any color the N64 can draw.
-                  'Rainbow': Rainbow sword trails.
-        ''',
-        gui_params     = {
-            'randomize_key': 'randomize_all_cosmetics',
-            'distribution': [
-                ('Completely Random', 1),
-            ]
-        }
-
-    ),
-    Setting_Info(
         name           = 'silver_gauntlets_color',
         type           = str,
         gui_text       = 'Silver Gauntlets Color',
@@ -3800,6 +3946,28 @@ setting_infos = [
         shared         = False,
         choices        = get_gauntlet_color_options(),
         default        = 'Gold',
+        gui_tooltip    = '''\
+            'Random Choice': Choose a random
+            color from this list of colors.
+            'Completely Random': Choose a random
+            color from any color the N64 can draw.
+        ''',
+        gui_params     = {
+            'randomize_key': 'randomize_all_cosmetics',
+            'distribution': [
+                ('Completely Random', 1),
+            ]
+        }
+
+    ),
+    Setting_Info(
+        name           = 'mirror_shield_frame_color',
+        type           = str,
+        gui_text       = 'Mirror Shield Frame Color',
+        gui_type       = "Combobox",
+        shared         = False,
+        choices        = get_shield_frame_color_options(),
+        default        = 'Red',
         gui_tooltip    = '''\
             'Random Choice': Choose a random
             color from this list of colors.
