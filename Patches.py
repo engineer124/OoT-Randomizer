@@ -708,6 +708,11 @@ def patch_rom(spoiler:Spoiler, world:World, rom:Rom):
     rom.write_byte(0xB6D3D2, 0x00) # Gerudo Training Grounds
     rom.write_byte(0xB6D42A, 0x00) # Inside Ganon's Castle
 
+    #Tell Sheik at Ice Cavern we are always an Adult
+    rom.write_int32(0xC7B9C0, 0x00000000)
+    rom.write_int32(0xC7BAEC, 0x00000000)
+    rom.write_int32(0xc7BCA4, 0x00000000)
+
     # Allow Farore's Wind in dungeons where it's normally forbidden
     rom.write_byte(0xB6D3D3, 0x00) # Gerudo Training Grounds
     rom.write_byte(0xB6D42B, 0x00) # Inside Ganon's Castle
@@ -856,16 +861,11 @@ def patch_rom(spoiler:Spoiler, world:World, rom:Rom):
         # Tell the well water we are always a child.
         rom.write_int32(0xDD5BF4, 0x00000000)
 
-        # Tell Sheik at Ice Cavern we are always an Adult
-        rom.write_int32(0xC7B9C0, 0x00000000)
-        rom.write_int32(0xC7BAEC, 0x00000000)
-        rom.write_int32(0xc7BCA4, 0x00000000)
-
         # Make the Adult well blocking stone dissappear if the well has been drained by
         # checking the well drain event flag instead of links age. This actor doesn't need a
         # code check for links age as the stone is absent for child via the scene alternate
         # lists. So replace the age logic with drain logic.
-        rom.write_int32(0xE2887C, rom.read_int32(0xE28870)) #relocate this to nop delay slot
+        rom.write_int32(0xE2887C, rom.read_int32(0xE28870)) # relocate this to nop delay slot
         rom.write_int32(0xE2886C, 0x95CEB4B0) # lhu
         rom.write_int32(0xE28870, 0x31CE0080) # andi
 
@@ -1346,7 +1346,7 @@ def patch_rom(spoiler:Spoiler, world:World, rom:Rom):
                 rom.write_byte(0x0D12ECB, special['item_id'])
                 rom.write_byte(0x2E8E931, special['text_id']) #Fix text box
             elif location.name == 'Song from Malon':
-                rom.write_byte(0x29BECB9, special['text_id']) #Fix text box
+                rom.write_byte(rom.sym('MALON_TEXT_ID'), special['text_id'])
             elif location.name == 'Song from Composers Grave':
                 rom.write_int16(0xE09F66, bit_mask_pointer)
                 rom.write_byte(0x332A87D, special['text_id']) #Fix text box
@@ -1356,8 +1356,8 @@ def patch_rom(spoiler:Spoiler, world:World, rom:Rom):
             elif location.name == 'Song from Ocarina of Time':
                 rom.write_byte(0x252FC95, special['text_id']) #Fix text box
             elif location.name == 'Song from Windmill':
-                rom.write_byte(0x0E42ABF, special['item_id'])
-                rom.write_byte(0x3041091, special['text_id']) #Fix text box
+                rom.write_byte(rom.sym('WINDMILL_SONG_ID'), next_song_id)
+                rom.write_byte(rom.sym('WINDMILL_TEXT_ID'), special['text_id'])
             elif location.name == 'Sheik in Forest':
                 rom.write_byte(0x0C7BAA3, special['item_id'])
                 rom.write_byte(0x20B0815, special['text_id']) #Fix text box
@@ -1743,6 +1743,11 @@ def patch_rom(spoiler:Spoiler, world:World, rom:Rom):
         symbol = rom.sym('FREE_SCARECROW_ENABLED')
         rom.write_byte(symbol, 0x01)
 
+    # Enable MM-like Bunny Hood behavior (1.5× speed)
+    if world.fast_bunny_hood:
+        symbol = rom.sym('FAST_BUNNY_HOOD_ENABLED')
+        rom.write_byte(symbol, 0x01)
+
     if world.ocarina_songs:
         replace_songs(rom)
 
@@ -1970,17 +1975,17 @@ def set_grotto_shuffle_data(rom, world):
             actor_zrot = rom.read_int16(actor + 12)
             actor_var = rom.read_int16(actor + 14)
             grotto_type = (actor_var >> 8) & 0x0F
-            grotto_id = (scene << 8) + (actor_var & 0x00FF)
+            grotto_actor_id = (scene << 8) + (actor_var & 0x00FF)
 
-            rom.write_int16(actor + 12, grotto_entrances_override[grotto_id])
+            rom.write_int16(actor + 12, grotto_entrances_override[grotto_actor_id])
             rom.write_byte(actor + 14, grotto_type + 0x20)
 
     # Build the override table based on shuffled grotto entrances
     grotto_entrances_override = {}
     for entrance in world.get_shuffled_entrances(type='Grotto'):
         if entrance.primary:
-            grotto_id = (entrance.data['scene'] << 8) + entrance.data['content']
-            grotto_entrances_override[grotto_id] = entrance.replaces.data['index']
+            grotto_actor_id = (entrance.data['scene'] << 8) + entrance.data['content']
+            grotto_entrances_override[grotto_actor_id] = entrance.replaces.data['index']
         else:
             rom.write_int16(rom.sym('GROTTO_EXIT_LIST') + 2 * entrance.data['grotto_id'], entrance.replaces.data['index'])
 

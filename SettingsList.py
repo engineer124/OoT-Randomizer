@@ -2,9 +2,9 @@ import argparse
 import re
 import math
 import json
-from Cosmetics import get_tunic_color_options, get_navi_color_options, get_sword_trail_color_options, \
+from Colors import get_tunic_color_options, get_navi_color_options, get_sword_trail_color_options, \
     get_bombchu_trail_color_options, get_boomerang_trail_color_options, get_gauntlet_color_options, \
-    get_magic_color_options, get_heart_color_options, get_shield_frame_color_options, get_a_button_color_options, \
+    get_magic_color_options, get_heart_color_options, get_shield_frame_color_options, get_a_button_color_options,\
     get_b_button_color_options, get_c_button_color_options, get_start_button_color_options
 from Location import LocationIterator
 import Sounds as sfx
@@ -16,10 +16,11 @@ from Hints import HintDistList, HintDistTips
 # holds the info for a single setting
 class Setting_Info():
 
-    def __init__(self, name, type, gui_text, gui_type, shared, choices, default=None, disabled_default=None, disable=None, gui_tooltip=None, gui_params=None):
+    def __init__(self, name, type, gui_text, gui_type, shared, choices, default=None, disabled_default=None, disable=None, gui_tooltip=None, gui_params=None, cosmetic=False):
         self.name = name # name of the setting, used as a key to retrieve the setting's value everywhere
         self.type = type # type of the setting's value, used to properly convert types to setting strings
         self.shared = shared # whether or not the setting is one that should be shared, used in converting settings to a string
+        self.cosmetic = cosmetic # whether or not the setting should be included in the cosmetic log
         self.gui_text = gui_text
         self.gui_type = gui_type
         if gui_tooltip is None:
@@ -89,29 +90,29 @@ class Setting_Info():
 class Checkbutton(Setting_Info):
 
     def __init__(self, name, gui_text, gui_tooltip=None, disable=None,
-            disabled_default=None, default=False, shared=False, gui_params=None):
+            disabled_default=None, default=False, shared=False, gui_params=None, cosmetic=False):
 
         choices = {
             True:  'checked',
             False: 'unchecked',
         }
 
-        super().__init__(name, bool, gui_text, 'Checkbutton', shared, choices, default, disabled_default, disable, gui_tooltip, gui_params)
+        super().__init__(name, bool, gui_text, 'Checkbutton', shared, choices, default, disabled_default, disable, gui_tooltip, gui_params, cosmetic)
 
 
 class Combobox(Setting_Info):
 
     def __init__(self, name, gui_text, choices, default, gui_tooltip=None,
-            disable=None, disabled_default=None, shared=False, gui_params=None):
+            disable=None, disabled_default=None, shared=False, gui_params=None, cosmetic=False):
 
-        super().__init__(name, str, gui_text, 'Combobox', shared, choices, default, disabled_default, disable, gui_tooltip, gui_params)
+        super().__init__(name, str, gui_text, 'Combobox', shared, choices, default, disabled_default, disable, gui_tooltip, gui_params, cosmetic)
 
 
 class Scale(Setting_Info):
 
     def __init__(self, name, gui_text, min, max, default, step=1,
             gui_tooltip=None, disable=None, disabled_default=None,
-            shared=False, gui_params=None):
+            shared=False, gui_params=None, cosmetic=False):
 
         choices = {
             i: str(i) for i in range(min, max+1, step)
@@ -122,7 +123,7 @@ class Scale(Setting_Info):
         gui_params['max']    = max
         gui_params['step']   = step
 
-        super().__init__(name, int, gui_text, 'Scale', shared, choices, default, disabled_default, disable, gui_tooltip, gui_params)
+        super().__init__(name, int, gui_text, 'Scale', shared, choices, default, disabled_default, disable, gui_tooltip, gui_params, cosmetic)
 
 
 logic_tricks = {
@@ -213,20 +214,18 @@ logic_tricks = {
         'tooltip' : '''\
                     Can be defeated by doing a precise jump slash.
                     '''},
-    'Deku Tree Basement Webs with Bow': {
+    'Deku Tree Basement Web to Gohma with Bow': {
         'name'    : 'logic_deku_b1_webs_with_bow',
         'tags'    : ("Deku Tree", "Entrance",),
         'tooltip' : '''\
-                    All spider web walls in Deku Tree basement can be burnt
-                    by adult using just a bow shooting through torches. Applies
-                    to the web obstructing the door to the single scrub room,
-                    the web obstructing the bombable wall in the back room
-                    and the circular floor web dropping to Gohma.
+                    All spider web walls in the Deku Tree basement can be burnt
+                    as adult with just a bow by shooting through torches. This
+                    trick only applies to the circular web leading to Gohma;
+                    the two vertical webs are always in logic.
 
-                    For the circular web dropping to Gohma, backflip onto the
-                    chest near the torch at the bottom of the vine wall. With a
-                    precise position you can shoot through the torch to the
-                    right edge of the circular web.
+                    Backflip onto the chest near the torch at the bottom of
+                    the vine wall. With precise positioning you can shoot
+                    through the torch to the right edge of the circular web.
 
                     This allows completion of adult Deku Tree with no fire source.
                     '''},
@@ -1368,7 +1367,7 @@ setting_infos = [
         gui_type    = "Textinput",
         shared      = False,
         choices     = {},
-        default     = "OOTE",
+        default     = "NICE",
         gui_tooltip = """\
             4 characters, should end with E to ensure Dolphin compatibility.
             Note: If you have multiple OoTR WAD files with different Channel IDs installed, the game can crash on a soft reset. Use a Title Deleter to remove old WADs.
@@ -1459,14 +1458,30 @@ setting_infos = [
     ),
     Checkbutton(
         name           = 'enable_distribution_file',
-        gui_text       = 'Enable Plandomizer (Optional)',
+        gui_text       = 'Enable Plandomizer (Advanced)',
         gui_tooltip    = '''\
             Optional. Use a plandomizer JSON file to get 
             total control over the item placement.
         ''',
+        gui_params     = {
+            'no_line_break': True,
+        },
         default        = False,
         disable        = {
             False  : {'settings' : ['distribution_file']},
+        },
+        shared         = False,
+    ),
+    Checkbutton(
+        name           = 'enable_cosmetic_file',
+        gui_text       = 'Enable Cosmetic Plandomizer (Advanced)',
+        gui_tooltip    = '''\
+            Optional. Use a cosmetic plandomizer JSON file to get 
+            more control over your cosmetic and sound settings.
+        ''',
+        default        = False,
+        disable        = {
+            False  : {'settings' : ['cosmetic_file']},
         },
         shared         = False,
     ),
@@ -1474,6 +1489,24 @@ setting_infos = [
         gui_tooltip = """\
             Optional. Place a plandomizer JSON file here 
             to get total control over the item placement.
+        """,
+        gui_params = {
+            "file_types": [
+                {
+                  "name": "JSON Files",
+                  "extensions": [ "json" ]
+                },
+                {
+                  "name": "All Files",
+                  "extensions": [ "*" ]
+                }
+            ],
+            "hide_when_disabled" : True,
+        }),
+    Setting_Info('cosmetic_file', str, "Cosmetic Plandomizer File", "Fileinput", False, {},
+        gui_tooltip = """\
+            Optional. Use a cosmetic plandomizer JSON file to get 
+            more control over your cosmetic and sound settings.
         """,
         gui_params = {
             "file_types": [
@@ -1566,7 +1599,7 @@ setting_infos = [
         disable        = {
             False : {
                 'tabs': ['cosmetics_tab','sfx_tab'],
-                'settings' : ['create_cosmetics_log'],
+                'settings' : ['create_cosmetics_log', 'enable_cosmetic_file', 'cosmetic_file'],
             },
         },
         shared         = False,
@@ -1604,7 +1637,7 @@ setting_infos = [
         },
         default        = 'True',
         disable        = {
-            'None'  : {'settings' : ['player_num', 'create_cosmetics_log', 'rom']},
+            'None'  : {'settings' : ['player_num', 'create_cosmetics_log', 'enable_cosmetic_file', 'cosmetic_file', 'rom']},
             'Patch' : {'settings' : ['player_num']}
         },
         gui_tooltip = '''\
@@ -1630,7 +1663,9 @@ setting_infos = [
         disable        = {
             True : {
                 'sections' : ['various_section', 'shuffle_section', 'shuffle_dungeon_section'],
-                'settings': ['starting_age', 'shuffle_interior_entrances', 'shuffle_grotto_entrances', 'shuffle_dungeon_entrances', 'shuffle_overworld_entrances', 'mix_entrance_pools', 'decouple_entrances', 'owl_drops', 'warp_songs', 'spawn_positions'],
+                'settings': ['starting_age', 'shuffle_interior_entrances', 'shuffle_grotto_entrances', 'shuffle_dungeon_entrances',
+                             'shuffle_overworld_entrances', 'mix_entrance_pools', 'decouple_entrances',
+                             'owl_drops', 'warp_songs', 'spawn_positions'],
             }
         },
         shared         = True,
@@ -1763,6 +1798,9 @@ setting_infos = [
             allowing access to Gerudo Training Grounds.
         ''',
         shared         = True,
+        disable        = {
+            'open' : {'settings' : ['shuffle_fortresskeys']}
+        },
         gui_params     = {
             'randomize_key': 'randomize_settings',
         },
@@ -1782,9 +1820,9 @@ setting_infos = [
         gui_tooltip    = '''\
             'Always Open': Rainbow Bridge is always present.
             'Vanilla Requirements': Spirit/Shadow Medallions and Light Arrows.
-            'Spiritual Stones': A configurable amount of 3 Spiritual Stones.
-            'Medallions': A configurable amount of 6 Medallions.
-            'Dungeons': A configurable amount of Dungeon Rewards (Medallions and Spiritual Stones).
+            'Spiritual Stones': A configurable amount of Spiritual Stones.
+            'Medallions': A configurable amount of Medallions.
+            'Dungeons': A configurable amount of Dungeon Rewards.
             'Gold Skulltula Tokens': A configurable amount of Gold Skulltula Tokens.
         ''',
         shared         = True,
@@ -1937,7 +1975,9 @@ setting_infos = [
             considered available. MAY BE IMPOSSIBLE TO BEAT.
         ''',
         disable        = {
-            'glitched'  : {'settings' : ['allowed_tricks', 'mq_dungeons_random', 'mq_dungeons', 'shuffle_interior_entrances', 'shuffle_grotto_entrances', 'shuffle_dungeon_entrances', 'shuffle_overworld_entrances', 'mix_entrance_pools', 'decouple_entrances', 'owl_drops', 'warp_songs', 'spawn_positions']},
+            'glitched'  : {'settings' : ['allowed_tricks', 'mq_dungeons_random', 'mq_dungeons', 'shuffle_interior_entrances',
+                                         'shuffle_grotto_entrances', 'shuffle_dungeon_entrances', 'shuffle_overworld_entrances',
+                                         'mix_entrance_pools', 'decouple_entrances', 'owl_drops', 'warp_songs', 'spawn_positions']},
             'none'      : {'tabs'     : ['detailed_tab']},
         },
         shared         = True,
@@ -2138,6 +2178,15 @@ setting_infos = [
             Pulling out the Ocarina near a
             spot at which Pierre can spawn will
             do so, without needing the song.
+        ''',
+        shared         = True,
+    ),
+    Checkbutton(
+        name           = 'fast_bunny_hood',
+        gui_text       = 'Fast Bunny Hood',
+        gui_tooltip    = '''\
+            The Bunny Hood mask behaves like it does
+            in Majora's Mask and makes you go 1.5× faster.
         ''',
         shared         = True,
     ),
@@ -2645,13 +2694,13 @@ setting_infos = [
         gui_text       = 'Maps & Compasses',
         default        = 'dungeon',
         choices        = {
-            'remove':    'Remove',
-            'startwith': 'Start With',
-            'vanilla':   'Vanilla Locations',
-            'dungeon':   'Dungeon Only',
-            'overworld': 'Overworld Only',
-            'dungeons':  'Any Dungeon',
-            'keysanity': 'Anywhere',
+            'remove':      'Remove',
+            'startwith':   'Start With',
+            'vanilla':     'Vanilla Locations',
+            'dungeon':     'Dungeon Only',
+            'overworld':   'Overworld Only',
+            'any_dungeon': 'Any Dungeon',
+            'keysanity':   'Anywhere',
         },
         gui_tooltip    = '''\
             'Remove': Maps and Compasses are removed.
@@ -2692,12 +2741,12 @@ setting_infos = [
         gui_text       = 'Small Keys',
         default        = 'dungeon',
         choices        = {
-            'remove':    'Remove (Keysy)',
-            'vanilla':   'Vanilla Locations',
-            'dungeon':   'Dungeon Only',
-            'overworld': 'Overworld Only (Keysanity)',
-            'dungeons':  'Any Dungeon (Keysanity)',
-            'keysanity': 'Anywhere (Keysanity)',
+            'remove':      'Remove (Keysy)',
+            'vanilla':     'Vanilla Locations',
+            'dungeon':     'Dungeon Only',
+            'overworld':   'Overworld Only',
+            'any_dungeon': 'Any Dungeon',
+            'keysanity':   'Anywhere (Keysanity)',
         },
         gui_tooltip    = '''\
             'Remove': Small Keys are removed. All locked
@@ -2734,6 +2783,39 @@ setting_infos = [
             'Small Keys: Dungeon' + 'Boss Keys: Anywhere'
             for a milder Keysanity experience.
         ''',
+        disable        = {
+            'any_dungeon': {'settings': ['one_item_per_dungeon']},
+        },
+        shared         = True,
+        gui_params     = {
+            'randomize_key': 'randomize_settings',
+        },
+    ),
+    Combobox(
+        name           = 'shuffle_fortresskeys',
+        gui_text       = 'Gerudo Fortress Keys',
+        default        = 'vanilla',
+        disabled_default = 'remove',
+        choices        = {
+            'vanilla':     'Vanilla Locations',
+            'overworld':   'Overworld Only',
+            'any_dungeon': 'Any Dungeon',
+            'keysanity':   'Anywhere (Keysanity)',
+        },
+        gui_tooltip    = '''\
+            'Vanilla': Gerudo Fortress Keys will appear in their
+            vanilla location, dropping from fighting Gerudo guards
+            that attack when trying to free the jailed carpenters.
+            
+            'Overworld Only': Gerudo Fortress Keys can only appear
+             outside of dungeons.
+            
+            'Dungeons Only': Gerudo Fortress Keys can only appear
+             inside of dungeons.
+
+            'Anywhere': Gerudo Fortress Keys can appear anywhere
+            in the world.
+        ''',
         shared         = True,
         gui_params     = {
             'randomize_key': 'randomize_settings',
@@ -2744,12 +2826,12 @@ setting_infos = [
         gui_text       = 'Boss Keys',
         default        = 'dungeon',
         choices        = {
-            'remove':    'Remove (Keysy)',
-            'vanilla':   'Vanilla Locations',
-            'dungeon':   'Dungeon Only',
-            'overworld': 'Overworld Only (Keysanity)',
-            'dungeons':  'Any Dungeon (Keysanity)',
-            'keysanity': 'Anywhere (Keysanity)',
+            'remove':      'Remove (Keysy)',
+            'vanilla':     'Vanilla Locations',
+            'dungeon':     'Dungeon Only',
+            'overworld':   'Overworld Only',
+            'any_dungeon': 'Any Dungeon',
+            'keysanity':   'Anywhere (Keysanity)',
         },
         gui_tooltip    = '''\
             'Remove': Boss Keys are removed. All locked
@@ -2796,12 +2878,12 @@ setting_infos = [
             'remove':          "Remove (Keysy)",
             'vanilla':         "Vanilla Location",
             'dungeon':         "Dungeon Only",
-            'overworld':       "Overworld Only (Keysanity)",
-            'dungeons':        "Any Dungeon (Keysanity)",
+            'overworld':       "Overworld Only",
+            'any_dungeon':     "Any Dungeon",
             'keysanity':       "Anywhere (Keysanity)",
             'lacs_vanilla':    "On LACS: Vanilla",
-            'lacs_medallions': "On LACS: Medallions",
             'lacs_stones':     "On LACS: Stones",
+            'lacs_medallions': "On LACS: Medallions",
             'lacs_dungeons':   "On LACS: Dungeons",
             'lacs_tokens':     "On LACS: Tokens",
         },
@@ -2832,7 +2914,6 @@ setting_infos = [
             'On LACS: Medallions': A configurable amount of Medallions.
             'On LACS: Stones': A configurable amount of Spiritual Stones.
             'On LACS: Dungeons': A configurable amount of Dungeon Rewards.
-                                 (Spiritual Stones & Medallions).
             'On LACS: Tokens': A configurable amount of Gold Skulltula Tokens.
         ''',
         shared         = True,
@@ -2841,11 +2922,11 @@ setting_infos = [
             'vanilla':          {'settings': ['lacs_medallions', 'lacs_stones', 'lacs_rewards', 'lacs_tokens']},
             'dungeon':          {'settings': ['lacs_medallions', 'lacs_stones', 'lacs_rewards', 'lacs_tokens']},
             'overworld':        {'settings': ['lacs_medallions', 'lacs_stones', 'lacs_rewards', 'lacs_tokens']},
-            'dungeons':         {'settings': ['lacs_medallions', 'lacs_stones', 'lacs_rewards', 'lacs_tokens']},
+            'any_dungeon':      {'settings': ['lacs_medallions', 'lacs_stones', 'lacs_rewards', 'lacs_tokens']},
             'keysanity':        {'settings': ['lacs_medallions', 'lacs_stones', 'lacs_rewards', 'lacs_tokens']},
             'lacs_vanilla':     {'settings': ['lacs_medallions', 'lacs_stones', 'lacs_rewards', 'lacs_tokens']},
-            'lacs_medallions':  {'settings': ['lacs_stones', 'lacs_rewards', 'lacs_tokens']},
             'lacs_stones':      {'settings': ['lacs_medallions', 'lacs_rewards', 'lacs_tokens']},
+            'lacs_medallions':  {'settings': ['lacs_stones', 'lacs_rewards', 'lacs_tokens']},
             'lacs_dungeons':    {'settings': ['lacs_medallions', 'lacs_stones', 'lacs_tokens']},
             'lacs_tokens':      {'settings': ['lacs_medallions', 'lacs_stones', 'lacs_rewards']},
         },
@@ -3395,6 +3476,8 @@ setting_infos = [
     Combobox(
         name           = 'default_targeting',
         gui_text       = 'Default Targeting Option',
+        shared         = False,
+        cosmetic       = True,
         default        = 'hold',
         choices        = {
             'hold':   'Hold',
@@ -3404,6 +3487,8 @@ setting_infos = [
     Combobox(
         name           = 'background_music',
         gui_text       = 'Background Music',
+        shared         = False,
+        cosmetic       = True,
         default        = 'normal',
         choices        = {
             'normal':               'Normal',
@@ -3427,6 +3512,8 @@ setting_infos = [
     Combobox(
         name           = 'fanfares',
         gui_text       = 'Fanfares',
+        shared         = False,
+        cosmetic       = True,
         default        = 'normal',
         choices        = {
             'normal':               'Normal',
@@ -3453,6 +3540,8 @@ setting_infos = [
     Checkbutton(
         name           = 'ocarina_fanfares',
         gui_text       = 'Ocarina Songs as Fanfares',
+        shared         = False,
+        cosmetic       = True,
         gui_tooltip    = '''\
             Include the songs that play when an ocarina song
             is played as part of the fanfare pool when
@@ -3471,6 +3560,8 @@ setting_infos = [
     Checkbutton(
         name           = 'display_dpad',
         gui_text       = 'Display D-Pad HUD',
+        shared         = False,
+        cosmetic       = True,
         gui_tooltip    = '''\
             Shows an additional HUD element displaying
             current available options on the D-Pad.
@@ -3480,6 +3571,8 @@ setting_infos = [
     Checkbutton(
         name           = 'correct_model_colors',
         gui_text       = 'Item Model Colors Match Cosmetics',
+        shared         = False,
+        cosmetic       = True,
         gui_tooltip    = '''\
             Ingame models for items such as Heart Containers have 
             colors matching the colors chosen for cosmetic settings.
@@ -3493,6 +3586,8 @@ setting_infos = [
     Checkbutton(
         name           = 'randomize_all_cosmetics',
         gui_text       = 'Randomize All Cosmetics',
+        shared         = False,
+        cosmetic       = True,
         gui_tooltip    = '''\
             Randomize all cosmetics settings.
         ''',
@@ -3508,6 +3603,7 @@ setting_infos = [
         gui_text       = "Kokiri Tunic",
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_tunic_color_options(),
         default        = 'Kokiri Green',
         gui_tooltip    = '''\
@@ -3529,6 +3625,7 @@ setting_infos = [
         gui_text       = "Goron Tunic",
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_tunic_color_options(),
         default        = 'Goron Red',
         gui_tooltip    = '''\
@@ -3551,6 +3648,7 @@ setting_infos = [
         gui_text       = "Zora Tunic",
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_tunic_color_options(),
         default        = 'Zora Blue',
         gui_tooltip    = '''\
@@ -3573,6 +3671,7 @@ setting_infos = [
         gui_text       = "Navi Idle Inner",
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_navi_color_options(),
         default        = 'White',
         gui_tooltip    = '''\
@@ -3596,6 +3695,7 @@ setting_infos = [
         gui_text       = "Outer",
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_navi_color_options(True),
         default        = '[Same as Inner]',
         gui_tooltip    = '''\
@@ -3619,6 +3719,7 @@ setting_infos = [
         gui_text       = 'Navi Targeting Enemy Inner',
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_navi_color_options(),
         default        = 'Yellow',
         gui_tooltip    = '''\
@@ -3643,6 +3744,7 @@ setting_infos = [
         gui_text       = 'Outer',
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_navi_color_options(True),
         default        = '[Same as Inner]',
         gui_tooltip    = '''\
@@ -3666,6 +3768,7 @@ setting_infos = [
         gui_text       = 'Navi Targeting NPC Inner',
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_navi_color_options(),
         default        = 'Light Blue',
         gui_tooltip    = '''\
@@ -3690,6 +3793,7 @@ setting_infos = [
         gui_text       = 'Outer',
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_navi_color_options(True),
         default        = '[Same as Inner]',
         gui_tooltip    = '''\
@@ -3713,6 +3817,7 @@ setting_infos = [
         gui_text       = 'Navi Targeting Prop Inner',
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_navi_color_options(),
         default        = 'Green',
         gui_tooltip    = '''\
@@ -3737,6 +3842,7 @@ setting_infos = [
         gui_text       = 'Outer',
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_navi_color_options(True),
         default        = '[Same as Inner]',
         gui_tooltip    = '''\
@@ -3784,6 +3890,7 @@ setting_infos = [
         gui_text       = 'Outer',
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_bombchu_trail_color_options(True),
         default        = '[Same as Inner]',
         gui_tooltip    = '''\
@@ -3807,6 +3914,7 @@ setting_infos = [
         gui_text       = 'Boomerang Trail Inner',
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_boomerang_trail_color_options(),
         default        = 'Yellow',
         gui_tooltip    = '''\
@@ -3831,6 +3939,7 @@ setting_infos = [
         gui_text       = 'Outer',
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_boomerang_trail_color_options(True),
         default        = '[Same as Inner]',
         gui_tooltip    = '''\
@@ -3854,6 +3963,7 @@ setting_infos = [
         gui_text       = 'Sword Trail Inner',
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_sword_trail_color_options(),
         default        = 'White',
         gui_tooltip    = '''\
@@ -3878,6 +3988,7 @@ setting_infos = [
         gui_text       = 'Outer',
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_sword_trail_color_options(True),
         default        = '[Same as Inner]',
         gui_tooltip    = '''\
@@ -3898,6 +4009,8 @@ setting_infos = [
     Combobox(
         name           = 'sword_trail_duration',
         gui_text       = 'Sword Trail Duration',
+        shared         = False,
+        cosmetic       = True,
         choices        = {
             4: 'Default',
             10: 'Long',
@@ -3924,6 +4037,7 @@ setting_infos = [
         gui_text       = 'Silver Gauntlets Color',
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_gauntlet_color_options(),
         default        = 'Silver',
         gui_tooltip    = '''\
@@ -3946,6 +4060,7 @@ setting_infos = [
         gui_text       = 'Golden Gauntlets Color',
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_gauntlet_color_options(),
         default        = 'Gold',
         gui_tooltip    = '''\
@@ -3990,6 +4105,7 @@ setting_infos = [
         gui_text       = 'Heart Color',
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_heart_color_options(),
         default        = 'Red',
         gui_tooltip    = '''\
@@ -4012,6 +4128,7 @@ setting_infos = [
         gui_text       = 'Magic Color',
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_magic_color_options(),
         default        = 'Green',
         gui_tooltip    = '''\
@@ -4034,6 +4151,7 @@ setting_infos = [
         gui_text       = 'A Button Color',
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_a_button_color_options(),
         default        = 'N64 Blue',
         gui_tooltip    = '''\
@@ -4056,6 +4174,7 @@ setting_infos = [
         gui_text       = 'B Button Color',
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_b_button_color_options(),
         default        = 'N64 Green',
         gui_tooltip    = '''\
@@ -4078,6 +4197,7 @@ setting_infos = [
         gui_text       = 'C Button Color',
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_c_button_color_options(),
         default        = 'Yellow',
         gui_tooltip    = '''\
@@ -4100,6 +4220,7 @@ setting_infos = [
         gui_text       = 'Start Button Color',
         gui_type       = "Combobox",
         shared         = False,
+        cosmetic       = True,
         choices        = get_start_button_color_options(),
         default        = 'N64 Red',
         gui_tooltip    = '''\
@@ -4119,6 +4240,8 @@ setting_infos = [
     Checkbutton(
         name           = 'randomize_all_sfx',
         gui_text       = 'Randomize All Sound Effects',
+        shared         = False,
+        cosmetic       = True,
         gui_tooltip    = '''\
             Randomize all sound effects and music settings (ear safe)
         ''',
@@ -4132,6 +4255,8 @@ setting_infos = [
     Combobox(
         name           = 'sfx_low_hp',
         gui_text       = 'Low HP',
+        shared         = False,
+        cosmetic       = True,
         choices        = sfx.get_setting_choices(sfx.SoundHooks.HP_LOW),
         default        = 'default',
         gui_tooltip    = '''\
@@ -4148,6 +4273,8 @@ setting_infos = [
     Combobox(
         name           = 'sfx_navi_overworld',
         gui_text       = 'Navi Overworld',
+        shared         = False,
+        cosmetic       = True,
         choices        = sfx.get_setting_choices(sfx.SoundHooks.NAVI_OVERWORLD),
         default        = 'default',
         gui_params     = {
@@ -4160,6 +4287,8 @@ setting_infos = [
     Combobox(
         name           = 'sfx_navi_enemy',
         gui_text       = 'Navi Enemy',
+        shared         = False,
+        cosmetic       = True,
         choices        = sfx.get_setting_choices(sfx.SoundHooks.NAVI_ENEMY),
         default        = 'default',
         gui_params     = {
@@ -4172,6 +4301,8 @@ setting_infos = [
     Combobox(
         name           = 'sfx_menu_cursor',
         gui_text       = 'Menu Cursor',
+        shared         = False,
+        cosmetic       = True,
         choices        = sfx.get_setting_choices(sfx.SoundHooks.MENU_CURSOR),
         default        = 'default',
         gui_params     = {
@@ -4184,6 +4315,8 @@ setting_infos = [
     Combobox(
         name           = 'sfx_menu_select',
         gui_text       = 'Menu Select',
+        shared         = False,
+        cosmetic       = True,
         choices        = sfx.get_setting_choices(sfx.SoundHooks.MENU_SELECT),
         default        = 'default',
         gui_params     = {
@@ -4196,6 +4329,8 @@ setting_infos = [
     Combobox(
         name           = 'sfx_horse_neigh',
         gui_text       = 'Horse',
+        shared         = False,
+        cosmetic       = True,
         choices        = sfx.get_setting_choices(sfx.SoundHooks.HORSE_NEIGH),
         default        = 'default',
         gui_params     = {
@@ -4208,6 +4343,8 @@ setting_infos = [
     Combobox(
         name           = 'sfx_nightfall',
         gui_text       = 'Nightfall',
+        shared         = False,
+        cosmetic       = True,
         choices        = sfx.get_setting_choices(sfx.SoundHooks.NIGHTFALL),
         default        = 'default',
         gui_params     = {
@@ -4220,6 +4357,8 @@ setting_infos = [
     Combobox(
         name           = 'sfx_hover_boots',
         gui_text       = 'Hover Boots',
+        shared         = False,
+        cosmetic       = True,
         choices        = sfx.get_setting_choices(sfx.SoundHooks.BOOTS_HOVER),
         default        = 'default',
         gui_params     = {
@@ -4232,6 +4371,8 @@ setting_infos = [
     Combobox(
         name           = 'sfx_ocarina',
         gui_text       = 'Ocarina',
+        shared         = False,
+        cosmetic       = True,
         choices        = {
             'ocarina':       'Default',
             'random-choice': 'Random Choice',

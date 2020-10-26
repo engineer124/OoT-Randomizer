@@ -49,7 +49,7 @@ class World(object):
         self.distribution = settings.distribution.world_dists[id]
 
         # rename a few attributes...
-        self.keysanity = self.shuffle_smallkeys in ['keysanity', 'remove', 'dungeons', 'overworld']
+        self.keysanity = self.shuffle_smallkeys in ['keysanity', 'remove', 'any_dungeon', 'overworld']
         self.check_beatable_only = not self.all_reachable
 
         self.shuffle_special_interior_entrances = self.shuffle_interior_entrances == 'all'
@@ -58,7 +58,7 @@ class World(object):
         self.entrance_shuffle = self.shuffle_interior_entrances or self.shuffle_grotto_entrances or self.shuffle_dungeon_entrances or \
                                 self.shuffle_overworld_entrances or self.owl_drops or self.warp_songs or self.spawn_positions
 
-        self.ensure_tod_access = self.shuffle_interior_entrances or self.shuffle_overworld_entrances
+        self.ensure_tod_access = self.shuffle_interior_entrances or self.shuffle_overworld_entrances or self.spawn_positions
         self.disable_trade_revert = self.shuffle_interior_entrances or self.shuffle_overworld_entrances or self.warp_songs
 
         if self.open_forest == 'closed' and (self.shuffle_special_interior_entrances or self.shuffle_overworld_entrances or 
@@ -528,13 +528,13 @@ class World(object):
     # get a list of items that don't have to be in their proper dungeon
     def get_unrestricted_dungeon_items(self):
         itempool = []
-        if self.shuffle_mapcompass in ['dungeons', 'overworld', 'keysanity']:
+        if self.shuffle_mapcompass in ['any_dungeon', 'overworld', 'keysanity']:
             itempool.extend([item for dungeon in self.dungeons for item in dungeon.dungeon_items])
-        if self.shuffle_smallkeys in ['dungeons', 'overworld', 'keysanity']:
+        if self.shuffle_smallkeys in ['any_dungeon', 'overworld', 'keysanity']:
             itempool.extend([item for dungeon in self.dungeons for item in dungeon.small_keys])
-        if self.shuffle_bosskeys in ['dungeons', 'overworld', 'keysanity']:
+        if self.shuffle_bosskeys in ['any_dungeon', 'overworld', 'keysanity']:
             itempool.extend([item for dungeon in self.dungeons if dungeon.name != 'Ganons Castle' for item in dungeon.boss_key])
-        if self.shuffle_ganon_bosskey in ['dungeons', 'overworld', 'keysanity']:
+        if self.shuffle_ganon_bosskey in ['any_dungeon', 'overworld', 'keysanity']:
             itempool.extend([item for dungeon in self.dungeons if dungeon.name == 'Ganons Castle' for item in dungeon.boss_key])
 
         for item in itempool:
