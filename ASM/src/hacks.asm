@@ -71,6 +71,19 @@ Gameplay_InitSkybox:
 .endarea
 
 ;==================================================================================================
+; Remove fanfare check to end Horseback Archery
+;==================================================================================================
+; Replaces:
+;   li      at, 0x01 ;
+.orga 0xC1C008 ; z_en_horse in EnHorse_UpdateHorsebackArchery
+    li      at, 0x02            //always true
+	
+; Replaces:
+;   li      at, 0x01 ;
+.orga 0xC1C018 ; z_en_horse in EnHorse_UpdateHorsebackArchery
+    li      at, 0x02            //always true
+
+;==================================================================================================
 ; Don't Use Sandstorm Transition if gameplay_field_keep is not loaded
 ;==================================================================================================
 
