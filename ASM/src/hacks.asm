@@ -71,6 +71,32 @@ Gameplay_InitSkybox:
 .endarea
 
 ;==================================================================================================
+; Shorten magic arrow equip
+;==================================================================================================
+; Replaces:
+;   sh      zero, 0x258(s0) ;
+.orga 0xBB7E5C ; 
+    sh      s4, 0x258(s0)            //
+	
+; Replaces:
+;   addiu      t9, 0xFE ;
+.orga 0xBB84B4 ; 
+    addiu      t9, zero, 0xFF            //
+	
+; Replaces:
+;   li      t4, 0xFE ;
+.orga 0xBB8798 ; 
+    addiu      t4, zero, 0xFF            //
+
+; Replaces:
+;   li      t4, 0xFE ;
+.orga 0xBB87AC ; 
+    bltzl      v0, @b_0xBB9050            //
+
+.orga 0xBB9050 ; 
+@b_0xBB9050:            //
+
+;==================================================================================================
 ; Don't Use Sandstorm Transition if gameplay_field_keep is not loaded
 ;==================================================================================================
 
