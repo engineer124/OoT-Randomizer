@@ -96,7 +96,7 @@ update_c_button:
 
     addu    t0, s0, a0 ; t0 = save context, offset by button index
     lbu     t1, 0x6C (t0) ; t1 = inventory index on this button
-    beq     t1, 0xFF, @@return
+    bge     t1, 0x38, @@return
     nop
     addu    t1, s0, t1 ; t1 = save context, offset by inventory index
     lbu     t1, 0x74 (t1) ; t1 = inventory contents
