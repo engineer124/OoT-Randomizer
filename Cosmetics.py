@@ -736,10 +736,10 @@ def patch_sfx(rom, settings, log, symbols):
     # Randomize enemy sfx
     if settings.sfx_enemy:
         enemy_sfx_entries = []
-        for i in range(399):
+        for i in range(499):
             enemy_sfx_entries.append(rom.read_int16(0x2CF3E + (i * 0x2)))
         random.shuffle(enemy_sfx_entries)
-        for i in range(399):
+        for i in range(499):
             rom.write_int16(0x2CF3E + (i * 0x2), enemy_sfx_entries[i])
 
 def patch_instrument(rom, settings, log, symbols):
