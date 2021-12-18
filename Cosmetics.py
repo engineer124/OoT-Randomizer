@@ -733,6 +733,14 @@ def patch_sfx(rom, settings, log, symbols):
         else:
             log.sfx[hook.value.name] = sounds_keyword_label[selection]
 
+    # Randomize enemy sfx
+    if settings.sfx_enemy:
+        enemy_sfx_entries = []
+        for i in range(399):
+            enemy_sfx_entries.append(rom.read_int16(0x2CF3E + (i * 0x2)))
+        random.shuffle(enemy_sfx_entries)
+        for i in range(399):
+            rom.write_int16(0x2CF3E + (i * 0x2), enemy_sfx_entries[i])
 
 def patch_instrument(rom, settings, log, symbols):
     # Player Instrument

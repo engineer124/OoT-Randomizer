@@ -3953,6 +3953,16 @@ setting_infos = [
         },
     ),
     Checkbutton(
+        name           = 'sfx_enemy',
+        gui_text       = 'Shuffle Enemy Sfxs',
+        shared         = False,
+        cosmetic       = True,
+        gui_tooltip    = '''\
+            Shuffle all sound effects of enemies.
+        ''',
+        default        = False,
+    ),
+    Checkbutton(
         name           = 'ocarina_fanfares',
         gui_text       = 'Ocarina Songs as Fanfares',
         shared         = False,
