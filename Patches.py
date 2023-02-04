@@ -937,6 +937,8 @@ def patch_rom(spoiler: Spoiler, world: World, rom: Rom):
     rom.write_bytes(0xE5400E, [0xB4, 0xA4])
     if world.settings.open_forest:
         rom.write_bytes(0xE5401C, [0x14, 0x0B])
+    # Move Link spawn 40 units forwards to prevent Pokey trap
+    rom.write_byte(0x206F0C7, 0xA3)
 
     # Fix Biggoron to check a different flag.
     rom.write_byte(0xED329B, 0x72)
